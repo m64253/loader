@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>LOADER test</title>
+	<link rel="stylesheet" type="text/css" href="qunit/qunit.css" />
+	<script src="qunit/qunit.js"></script>
+</head>
+<body>
+
+<h1 id="qunit-header">Loader tests</h1>
+<h2 id="qunit-banner"></h2>
+<div id="qunit-testrunner-toolbar"></div>
+<h2 id="qunit-userAgent"></h2>
+<ol id="qunit-tests"></ol>
+
+<span id="externalTest" class="yui3-g"></span>
+
+<script src="../loader.js"></script>
+<script>
+	getStyle = function(elem, style) {
+		var computedStyle;
+
+		if (elem.currentStyle !== undefined) {
+			computedStyle = elem.currentStyle;
+		} else {
+			computedStyle = document.defaultView.getComputedStyle(elem, null);
+		}
+
+		return computedStyle[style];
+	}
+</script>
+<script>
+	
+	test("LOCAL: Successfully load JS file", function() {
+		stop();
+		loader.js('mocks/test1.js', function (err, res) {
+			equal(err, null, 'Should not throw error');
+			equal(window.mockTest1, 1, 'Should global value of 1');
+			start();
+		});
+		equal(window.mockTest1, undefined, 'Verify that it is async!');
+	});
+	test("LOCAL: Successfully load CSS file", function() {
+		var el = document.body,
+			backgroundColor = getStyle(el, 'backgroundColor');
+		
+		stop();
+		
+		loader.css('mocks/test1.css', function (err, res) {
+			equal(err, null, 'Should not throw error');
+			notEqual(getStyle(el, 'backgroundColor'), backgroundColor, 'Should global value of black');
+			start();
+		});
+		
+		equal(getStyle(el, 'backgroundColor'), backgroundColor, 'Verify that it is async!');
+	});
+	test("LOCAL: Fail to load JS file", function() {
+		stop();
+		loader.js('mocks/fail.js', function (err, res) {
+			ok(err instanceof Error, 'Should return error');
+			start();
+		});
+	});
+	test("LOCAL: Fail to load CSS file", function() {
+		stop();
+		loader.css('mocks/fail.css', function (err, res) {
+			ok(err instanceof Error, 'Should return error');
+			start();
+		});
+	});
+	
+	
+	/**
+	 * External
+	 */
+	test("EXTERNAL: Successfully load JS file", function() {
+		stop();
+		loader.js('http://yui.yahooapis.com/3.4.1/build/yui/yui.js', function (err, res) {
+			equal(err, null, 'Should not throw error');
+			notEqual(window.YUI, undefined, 'Should global value of 1');
+			start();
+		});
+		equal(window.YUI, undefined, 'Verify that it is async!');
+	});
+	test("EXTERNAL: Successfully load CSS file", function() {
+		var el = document.getElementById('externalTest'),
+			letterSpacing = getStyle(el, 'letterSpacing');
+		stop();
+		loader.css('http://yui.yahooapis.com/3.4.1/build/cssgrids/cssgrids.css', function (err, res) {
+			equal(err, null, 'Should not throw error');
+			notEqual(getStyle(el, 'letterSpacing'), letterSpacing, 'Should global value of 1');
+			start();
+		});
+		equal(getStyle(el, 'letterSpacing'), letterSpacing, 'Verify that it is async!');
+	});
+	test("EXTERNAL: Fail to load JS file", function() {
+		stop();
+		loader.js('http://test.fail/fail.js', function (err, res) {
+			ok(err instanceof Error, 'Should return error');
+			start();
+		});
+	});
+	test("EXTERNAL: Fail to load CSS file", function() {
+		stop();
+		loader.css('http://test.fail/fail.css', function (err, res) {
+			ok(err instanceof Error, 'Should return error');
+			start();
+		});
+	});
+</script>
+</body>
+</html>

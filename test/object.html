@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>OBJECT load test</title>
+	<link rel="stylesheet" type="text/css" href="qunit/qunit.css" />
+	<script src="qunit/qunit.js"></script>
+</head>
+<body>
+
+<h1 id="qunit-header">Loader tests</h1>
+<h2 id="qunit-banner"></h2>
+<div id="qunit-testrunner-toolbar"></div>
+<h2 id="qunit-userAgent"></h2>
+<ol id="qunit-tests"></ol>
+
+<span id="externalTest" class="yui3-g"></span>
+
+<script>
+	var body = document.body,
+		helper = function (data, fn) {
+			var el = document.createElement('object');
+			
+			el.data = data;
+			el.type = 'text/plain';
+			el.width = 0;
+			el.height = 0;
+			
+			el.onload = function () {
+				console && console.log('onload', data, arguments);
+				el.onload = el.onerror = null;
+				fn();
+			};
+			el.onerror = function () {
+				console && console.log('onerror', data, arguments);
+				el.onload = el.onerror = null;
+				fn(new Error());
+			};
+			el.onreadystatechange = function () {
+				console && console.log('onreadystatechange', data, arguments);
+			};
+			body.appendChild(el);
+		};
+	
+	/**
+	 * Local
+	 */
+	test("LOCAL: Successfully load", function() {
+		stop();
+		helper('mocks/test1.js', function (err) {
+			equal(err, null, 'Should not return an error');
+			start();
+		});
+	});
+	test("LOCAL: Fail to load", function() {
+		stop();
+		helper('mocks/fail.js', function (err) {
+			ok(err instanceof Error, 'Should return error');
+			start();
+		});
+	});
+	
+	
+	/**
+	 * External
+	 */
+	test("EXTERNAL: Successfully load", function() {
+		stop();
+		helper('http://yui.yahooapis.com/3.4.1/build/yui/yui.js', function (err) {
+			equal(err, null, 'Should not return an error');
+			start();
+		});
+	});
+	test("EXTERNAL: Fail to load", function() {
+		stop();
+		helper('http://test.fail/fail.js', function (err) {
+			ok(err instanceof Error, 'Should return error');
+			start();
+		});
+	});
+</script>
+</body>
+</html>

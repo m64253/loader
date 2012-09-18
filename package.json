@@ -1,0 +1,10 @@
+{
+	"name": "loader",
+	"version": "0.0.0",
+	"private": true,
+	
+	"dependencies": {
+		"node-static"	: ">0.0.0",
+		"send"			: ">0.0.4"
+	}
+}
